@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ShoppingCart, Package } from 'lucide-react';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Search, ShoppingCart, Package, Star, Heart, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/hooks/useCart';
 
@@ -121,7 +122,7 @@ const Browse = () => {
           </Select>
         </div>
 
-        {/* Products Grid */}
+        {/* Products Display */}
         {filteredProducts.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
@@ -135,68 +136,228 @@ const Browse = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{product.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{product.brand}</p>
-                    </div>
-                    <Badge variant="secondary">
-                      OTC
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {product.description}
-                    </p>
-                    {product.dosage && (
-                      <p className="text-sm font-medium mt-1">Dosage: {product.dosage}</p>
-                    )}
-                  </div>
+          <div className="space-y-8">
+            {/* Featured Products Carousel */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Featured Products</h2>
+              </div>
+              
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full relative"
+              >
+                <CarouselContent className="-ml-2 md:-ml-3">
+                  {filteredProducts.slice(0, 6).map((product) => (
+                    <CarouselItem key={product.id} className="pl-2 md:pl-3 basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                      <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50">
+                        {/* Product Image Section */}
+                        <div className="relative h-32 bg-gradient-to-br from-cyan-100 to-blue-100 overflow-hidden">
+                          {product.image_url ? (
+                            <img 
+                              src={product.image_url} 
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="h-10 w-10 text-cyan-400" />
+                            </div>
+                          )}
+                          
+                          {/* Overlay Badges */}
+                          <div className="absolute top-2 left-2 flex flex-col gap-1">
+                            <Badge className="bg-cyan-600 text-white text-xs shadow-lg">
+                              {product.category?.toUpperCase() || 'OTC'}
+                            </Badge>
+                            {product.stock_quantity <= 5 && product.stock_quantity > 0 && (
+                              <Badge variant="destructive" className="text-xs px-1 py-0">
+                                Low Stock
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          {/* Action Buttons */}
+                          <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <Button size="sm" variant="secondary" className="h-6 w-6 p-0 rounded-full shadow-lg">
+                              <Heart className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="secondary" className="h-6 w-6 p-0 rounded-full shadow-lg">
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
 
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-2xl font-bold text-primary">₦{product.price}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Stock: {product.stock_quantity}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{product.pharmacy.name}</p>
-                      <Badge 
-                        variant={product.pharmacy.verification_status === 'approved' ? "secondary" : "outline"}
-                        className="text-xs text-cyan-400"
-                      >
-                        {product.pharmacy.verification_status}
-                      </Badge>
-                    </div>
-                  </div>
+                        <CardContent className="p-3 space-y-2">
+                          {/* Product Info */}
+                          <div className="space-y-1">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <CardTitle className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-cyan-600 transition-colors">
+                                  {product.name}
+                                </CardTitle>
+                                <p className="text-xs text-cyan-600 font-medium truncate">{product.brand}</p>
+                              </div>
+                              <div className="flex items-center gap-1 ml-1 flex-shrink-0">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                <span className="text-xs font-medium">4.8</span>
+                              </div>
+                            </div>
+                            
+                            {product.dosage && (
+                              <p className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full inline-block">
+                                {product.dosage}
+                              </p>
+                            )}
+                          </div>
 
-                  <Button 
-                    className="w-full mt-4 bg-cyan-800" 
-                    disabled={product.stock_quantity <= 0}
-                    onClick={() => {
-                      addToCart({
-                        product_id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        pharmacy_name: product.pharmacy.name,
-                        pharmacy_id: product.pharmacy.id
-                      });
-                      toast({ title: "Added to cart!" });
-                    }}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    {product.stock_quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                          {/* Description */}
+                          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                            {product.description}
+                          </p>
+
+                          {/* Price and Stock */}
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-lg font-bold text-cyan-600">₦{product.price.toLocaleString()}</p>
+                              <p className="text-xs text-gray-500">
+                                {product.stock_quantity > 0 ? `${product.stock_quantity} in stock` : 'Out of stock'}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs font-medium text-gray-700 truncate max-w-20">{product.pharmacy.name}</p>
+                              <Badge 
+                                variant={product.pharmacy.verification_status === 'approved' ? "default" : "outline"}
+                                className={`text-xs px-1 py-0 ${
+                                  product.pharmacy.verification_status === 'approved' 
+                                    ? 'bg-green-100 text-green-700 border-green-200' 
+                                    : 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                                }`}
+                              >
+                                {product.pharmacy.verification_status}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Add to Cart Button */}
+                          <Button 
+                            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium py-2 text-xs rounded-lg shadow-md hover:shadow-lg transition-all duration-300" 
+                            disabled={product.stock_quantity <= 0}
+                            onClick={() => {
+                              addToCart({
+                                product_id: product.id,
+                                name: product.name,
+                                price: product.price,
+                                pharmacy_name: product.pharmacy.name,
+                                pharmacy_id: product.pharmacy.id
+                              });
+                              toast({ 
+                                title: "Added to cart!", 
+                                description: `${product.name} has been added to your cart.`
+                              });
+                            }}
+                          >
+                            <ShoppingCart className="h-3 w-3 mr-1" />
+                            {product.stock_quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute -left-8 top-1/2 -translate-y-1/2 h-8 w-8" />
+                <CarouselNext className="absolute -right-8 top-1/2 -translate-y-1/2 h-8 w-8" />
+              </Carousel>
+            </div>
+
+            {/* All Products Grid */}
+            {filteredProducts.length > 6 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">All Products</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                  {filteredProducts.slice(6).map((product) => (
+                    <Card key={product.id} className="group relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50">
+                      {/* Product Image Section */}
+                      <div className="relative h-28 bg-gradient-to-br from-cyan-100 to-blue-100 overflow-hidden">
+                        {product.image_url ? (
+                          <img 
+                            src={product.image_url} 
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="h-8 w-8 text-cyan-400" />
+                          </div>
+                        )}
+                        
+                        {/* Overlay Badge */}
+                        <div className="absolute top-1 left-1">
+                          <Badge className="bg-cyan-600 text-white text-xs px-1 py-0 shadow-lg">
+                            {product.category?.toUpperCase() || 'OTC'}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <CardContent className="p-2 space-y-2">
+                        {/* Product Info */}
+                        <div>
+                          <CardTitle className="text-xs font-bold text-gray-900 line-clamp-2 group-hover:text-cyan-600 transition-colors leading-tight">
+                            {product.name}
+                          </CardTitle>
+                          <p className="text-xs text-cyan-600 font-medium truncate">{product.brand}</p>
+                        </div>
+
+                        {/* Price and Stock */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold text-cyan-600">₦{product.price.toLocaleString()}</p>
+                            <Badge 
+                              variant={product.pharmacy.verification_status === 'approved' ? "default" : "outline"}
+                              className={`text-xs px-1 py-0 ${
+                                product.pharmacy.verification_status === 'approved' 
+                                  ? 'bg-green-100 text-green-700 border-green-200' 
+                                  : 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                              }`}
+                            >
+                              {product.pharmacy.verification_status}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            {product.stock_quantity > 0 ? `${product.stock_quantity} in stock` : 'Out of stock'}
+                          </p>
+                        </div>
+
+                        {/* Add to Cart Button */}
+                        <Button 
+                          className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium py-1.5 text-xs rounded-md shadow-sm hover:shadow-md transition-all duration-300" 
+                          disabled={product.stock_quantity <= 0}
+                          onClick={() => {
+                            addToCart({
+                              product_id: product.id,
+                              name: product.name,
+                              price: product.price,
+                              pharmacy_name: product.pharmacy.name,
+                              pharmacy_id: product.pharmacy.id
+                            });
+                            toast({ 
+                              title: "Added to cart!", 
+                              description: `${product.name} has been added to your cart.`
+                            });
+                          }}
+                        >
+                          <ShoppingCart className="h-3 w-3 mr-1" />
+                          {product.stock_quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
