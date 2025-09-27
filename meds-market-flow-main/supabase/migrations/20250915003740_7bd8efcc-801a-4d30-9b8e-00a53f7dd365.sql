@@ -90,6 +90,18 @@ CREATE TABLE public.order_items (
   total_price DECIMAL(10,2) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
+create table public.deliveries (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  pharmacy_id uuid not null references public.pharmacies(id) on delete cascade,
+  delivery_agent_id uuid not null references auth.users(id) on delete cascade,
+  status text not null default 'pending',
+  confirmed_by_admin boolean not null default false,
+  confirmed_by_pharmacy boolean not null default false,
+  delivered_at timestamp with time zone,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
 
 
 
@@ -100,6 +112,7 @@ ALTER TABLE public.pharmacies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.deliveries ENABLE ROW LEVEL SECURITY;
 
 -- Create security definer function to check user roles
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)

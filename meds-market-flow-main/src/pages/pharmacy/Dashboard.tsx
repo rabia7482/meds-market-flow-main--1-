@@ -200,7 +200,7 @@ const PharmacyDashboard = () => {
             </a>
 
             <a 
-              href="/pharmacy/profile" 
+              href="/profile" 
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
               <FileText className="h-8 w-8 mx-auto mb-2 text-primary" />
