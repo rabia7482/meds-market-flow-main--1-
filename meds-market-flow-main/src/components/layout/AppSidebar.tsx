@@ -7,7 +7,8 @@ import {
   FileText, 
   Users, 
   Settings,
-  Pill
+  Pill,
+  Crown
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,6 +27,7 @@ const customerItems = [
   { title: "Browse", url: "/browse", icon: Store },
   { title: "Cart", url: "/cart", icon: ShoppingCart },
   { title: "Orders", url: "/orders", icon: FileText },
+  { title: "Subscription", url: "/subscription", icon: Crown },
   { title: "Profile", url: "/profile", icon: Settings },
 ];
 
