@@ -11,7 +11,7 @@ import { User } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  requiredRole?: 'admin' | 'pharmacy' | 'customer';
+  requiredRole?: 'admin' | 'pharmacy' | 'customer' | 'delivery_agent';
 }
 
 export function DashboardLayout({ children, requiredRole }: DashboardLayoutProps) {

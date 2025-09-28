@@ -1,14 +1,15 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { 
-  Home, 
-  Store, 
-  Package, 
-  ShoppingCart, 
-  FileText, 
-  Users, 
+import {
+  Home,
+  Store,
+  Package,
+  ShoppingCart,
+  FileText,
+  Users,
   Settings,
   Pill,
-  Crown
+  Crown,
+  Truck
 } from "lucide-react";
 import {
   Sidebar,
@@ -46,6 +47,12 @@ const adminItems = [
   { title: "Orders", url: "/admin/orders", icon: FileText },
 ];
 
+const deliveryAgentItems = [
+  { title: "Dashboard", url: "/delivery/dashboard", icon: Home },
+  { title: "Deliveries", url: "/delivery/dashboard", icon: Truck },
+  { title: "Profile", url: "/profile", icon: Settings },
+];
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
@@ -58,6 +65,8 @@ export function AppSidebar() {
         return adminItems;
       case 'pharmacy':
         return pharmacyItems;
+      case 'delivery_agent':
+        return deliveryAgentItems;
       default:
         return customerItems;
     }
@@ -82,7 +91,7 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel>
-            {role === 'admin' ? 'Admin' : role === 'pharmacy' ? 'Pharmacy' : 'Customer'}
+            {role === 'admin' ? 'Admin' : role === 'pharmacy' ? 'Pharmacy' : role === 'delivery_agent' ? 'Delivery Agent' : 'Customer'}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

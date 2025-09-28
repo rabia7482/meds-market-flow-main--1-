@@ -1,29 +1,20 @@
-# Remove Prescription Functionality
+# Delivery System Extension Task
 
-## Database Schema Changes
-- [x] Update migration file: remove 'prescription' from product_category enum
-- [x] Remove requires_prescription from products table
-- [x] Remove prescription_required and prescription_verified from orders table
-- [x] Remove entire prescriptions table and related triggers/policies
+## Steps to Complete
 
-## Type Definitions
-- [x] Update types.ts: remove prescriptions table
-- [x] Remove prescription fields from orders and products types
-- [x] Remove 'prescription' from product_category enum
-
-## Frontend Code Updates
-- [x] Update useCart.tsx: remove requires_prescription from cart item interface
-- [x] Update Cart.tsx: remove prescription checks, badges, warnings
-- [x] Update Browse.tsx: remove 'prescription' from categories, remove Rx badges
-- [x] Update Orders.tsx: remove prescription status displays
-- [x] Update pharmacy/Orders.tsx: remove prescription verification logic
-- [x] Update pharmacy/Dashboard.tsx: remove prescription orders count
-- [x] Update pharmacy/Products.tsx: remove requires_prescription field and switch
-- [x] Update admin/Orders.tsx: remove prescription badges
-- [x] Update admin/Products.tsx: remove prescription required badges
-- [x] Update Index.tsx: remove prescription upload mention
-
-## Testing
-- [x] Verify app builds without errors
-- [ ] Test cart and checkout flow
-- [ ] Test product browsing and filtering
+- [x] Create AdminDeliveries.tsx page with deliveries list, filters, and actions
+- [x] Add /admin/deliveries route to App.tsx
+- [x] Update AdminDashboard.tsx to include deliveries stats and quick action link
+- [x] Update AdminPharmacies.tsx to add deliveries section/link for each pharmacy
+- [x] Update AdminOrders.tsx to add delivery status/info for each order
+- [x] Update AdminUsers.tsx to add deliveries assigned to each user (delivery agents)
+- [x] Add 'delivery_agent' to app_role enum in types.ts
+- [x] Update useAuth.tsx to handle role in signUp
+- [x] Update Auth.tsx to include role selection in sign up
+- [x] Update pharmacy Orders.tsx to show delivery info and confirm handover
+- [x] Update customer Orders.tsx to show delivery info
+- [x] Create DeliveryDashboard.tsx for delivery agents to manage their assigned deliveries
+- [x] Add /delivery/dashboard route to App.tsx
+- [x] Update DashboardLayout to support delivery_agent role
+- [x] Update AppSidebar to include delivery agent navigation
+- [x] Update useUserRole to handle delivery_agent role

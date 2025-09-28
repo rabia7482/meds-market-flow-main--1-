@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, Eye, MapPin, Phone, Mail } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, MapPin, Phone, Mail, Truck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Pharmacy {
   id: string;
@@ -161,6 +162,13 @@ const AdminPharmacies = () => {
                         NAFDAC: {pharmacy.nafdac_number}
                       </p>
                     )}
+                    <Link
+                      to={`/admin/deliveries?pharmacy=${pharmacy.id}`}
+                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-1"
+                    >
+                      <Truck className="h-3 w-3" />
+                      View Deliveries
+                    </Link>
                   </div>
                 </div>
 

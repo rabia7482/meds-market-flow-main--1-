@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Clock, CheckCircle, XCircle, AlertCircle, Package } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, AlertCircle, Package, Truck } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -26,6 +26,12 @@ interface Order {
       brand: string;
     };
   }>;
+  delivery?: {
+    id: string;
+    status_delivery: string;
+    delivery_agent: string;
+    confirmed_by_pharmacy: boolean;
+  };
 }
 
 const PharmacyOrders = () => {
@@ -56,7 +62,7 @@ const PharmacyOrders = () => {
 
     if (!pharmacy) throw new Error('Pharmacy not found');
 
-      const { data, error } = await supabase
+      const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
           *,
@@ -68,8 +74,35 @@ const PharmacyOrders = () => {
         .eq('pharmacy_id', pharmacy.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setOrders(data || []);
+      if (ordersError) throw ordersError;
+
+      const orderIds = ordersData?.map(order => order.id) || [];
+
+      const { data: deliveriesData, error: deliveriesError } = await supabase
+        .from('deliveries')
+        .select(`
+          id,
+          order_id,
+          status_delivery,
+          confirmed_by_pharmacy,
+          profiles!deliveries_delivery_agent_id_fkey(full_name)
+        `)
+        .in('order_id', orderIds);
+
+      if (deliveriesError) throw deliveriesError;
+
+      // Transform orders with deliveries
+      const transformedOrders = ordersData?.map(order => ({
+        ...order,
+        delivery: deliveriesData?.find(d => d.order_id === order.id) ? {
+          id: deliveriesData.find(d => d.order_id === order.id)!.id,
+          status_delivery: deliveriesData.find(d => d.order_id === order.id)!.status_delivery,
+          delivery_agent: (deliveriesData.find(d => d.order_id === order.id)!.profiles as any)?.full_name || 'Unknown',
+          confirmed_by_pharmacy: deliveriesData.find(d => d.order_id === order.id)!.confirmed_by_pharmacy
+        } : undefined
+      })) || [];
+
+      setOrders(transformedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({
@@ -103,6 +136,34 @@ const PharmacyOrders = () => {
       toast({
         title: "Error",
         description: error.message || "Failed to update order status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const confirmDelivery = async (deliveryId: string) => {
+    try {
+      const { error } = await supabase
+        .from('deliveries')
+        .update({ confirmed_by_pharmacy: true })
+        .eq('id', deliveryId);
+
+      if (error) throw error;
+
+      setOrders(orders.map(order =>
+        order.delivery?.id === deliveryId
+          ? { ...order, delivery: { ...order.delivery, confirmed_by_pharmacy: true } }
+          : order
+      ));
+
+      toast({
+        title: "Delivery confirmed",
+        description: "Delivery handover confirmed successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to confirm delivery",
         variant: "destructive",
       });
     }
@@ -249,7 +310,41 @@ const PharmacyOrders = () => {
                     </div>
                   )}
 
-
+                  {/* Delivery Info */}
+                  {order.delivery ? (
+                    <div className="border-t pt-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Truck className="h-4 w-4" />
+                        <h4 className="font-medium">Delivery</h4>
+                        <Badge variant="secondary" className={
+                          order.delivery.status_delivery === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.delivery.status_delivery === 'in-transit' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }>
+                          {order.delivery.status_delivery.replace('-', ' ')}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Agent: {order.delivery.delivery_agent}
+                      </p>
+                      {!order.delivery.confirmed_by_pharmacy && (
+                        <Button
+                          onClick={() => confirmDelivery(order.delivery!.id)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Confirm Delivery Handover
+                        </Button>
+                      )}
+                      {order.delivery.confirmed_by_pharmacy && (
+                        <p className="text-sm text-green-600">✓ Confirmed by pharmacy</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="border-t pt-4">
+                      <p className="text-sm text-muted-foreground">No delivery assigned</p>
+                    </div>
+                  )}
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-4">

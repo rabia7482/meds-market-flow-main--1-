@@ -98,6 +98,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "deliveries_delivery_agent_id_fkey"
+            columns: ["delivery_agent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "deliveries_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
@@ -336,7 +343,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "pharmacy" | "customer"
+      app_role: "admin" | "pharmacy" | "customer" | "delivery_agent"
       order_status:
         | "pending"
         | "approved"
@@ -479,7 +486,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "pharmacy", "customer"],
+      app_role: ["admin", "pharmacy", "customer", "delivery_agent"],
       order_status: [
         "pending",
         "approved",
@@ -495,6 +502,7 @@ export const Constants = {
         "medical_devices",
       ],
       verification_status: ["pending", "approved", "rejected"],
+      status_delivery: ["pending", "in-transit", "delivered"],
     },
   },
 } as const

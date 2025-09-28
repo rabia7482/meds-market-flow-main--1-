@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Search, Store, User, Calendar, MapPin } from 'lucide-react';
+import { FileText, Search, Store, User, Calendar, MapPin, Truck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Order {
   id: string;
@@ -26,6 +27,11 @@ interface Order {
     quantity: number;
     unit_price: number;
   }[];
+  delivery?: {
+    id: string;
+    status_delivery: string;
+    delivery_agent?: string;
+  };
 }
 
 const AdminOrders = () => {
@@ -54,7 +60,7 @@ const AdminOrders = () => {
       // Fetch profiles and order items separately to avoid relation issues
       const orderIds = data?.map(order => order.id) || [];
       
-      const [profilesResponse, itemsResponse] = await Promise.all([
+      const [profilesResponse, itemsResponse, deliveriesResponse] = await Promise.all([
         supabase
           .from('profiles')
           .select('user_id, full_name')
@@ -67,11 +73,22 @@ const AdminOrders = () => {
             unit_price,
             product:products(name)
           `)
+          .in('order_id', orderIds),
+        supabase
+          .from('deliveries')
+          .select(`
+            id,
+            order_id,
+            status_delivery,
+            delivery_agent_id,
+            profiles!deliveries_delivery_agent_id_fkey(full_name)
+          `)
           .in('order_id', orderIds)
       ]);
 
       const profiles = profilesResponse.data || [];
       const items = itemsResponse.data || [];
+      const deliveries = deliveriesResponse.data || [];
 
       // Transform the data
       const transformedOrders = data?.map(order => ({
@@ -83,7 +100,12 @@ const AdminOrders = () => {
             product_name: (item.product as any)?.name || 'Unknown Product',
             quantity: item.quantity,
             unit_price: item.unit_price
-          }))
+          })),
+        delivery: deliveries.find(d => d.order_id === order.id) ? {
+          id: deliveries.find(d => d.order_id === order.id)!.id,
+          status_delivery: deliveries.find(d => d.order_id === order.id)!.status_delivery,
+          delivery_agent: (deliveries.find(d => d.order_id === order.id)!.profiles as any)?.full_name
+        } : undefined
       })) || [];
 
       setOrders(transformedOrders);
@@ -235,6 +257,36 @@ const AdminOrders = () => {
                       ))}
                     </div>
                   </div>
+
+                  {/* Delivery Info */}
+                  {order.delivery ? (
+                    <div className="border-t pt-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Truck className="h-4 w-4" />
+                        <p className="font-medium">Delivery</p>
+                        <Badge variant="secondary" className={
+                          order.delivery.status_delivery === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.delivery.status_delivery === 'in-transit' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }>
+                          {order.delivery.status_delivery.replace('-', ' ')}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Agent: {order.delivery.delivery_agent || 'Not assigned'}
+                      </p>
+                      <Link
+                        to={`/admin/deliveries?order=${order.id}`}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        View Delivery Details →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="border-t pt-4">
+                      <p className="text-sm text-muted-foreground">No delivery assigned</p>
+                    </div>
+                  )}
 
                   {order.notes && (
                     <div className="border-t pt-4">

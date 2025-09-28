@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Store, Users, Package, FileText, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Store, Users, Package, FileText, TrendingUp, AlertTriangle, Truck } from 'lucide-react';
 
 interface AdminStats {
   totalPharmacies: number;
@@ -12,6 +13,7 @@ interface AdminStats {
   totalProducts: number;
   totalOrders: number;
   totalRevenue: number;
+  totalDeliveries: number;
 }
 
 const AdminDashboard = () => {
@@ -23,6 +25,7 @@ const AdminDashboard = () => {
     totalProducts: 0,
     totalOrders: 0,
     totalRevenue: 0,
+    totalDeliveries: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -52,12 +55,18 @@ const AdminDashboard = () => {
         .from('orders')
         .select('id, total_amount');
 
+      // Fetch deliveries
+      const { data: deliveries } = await supabase
+        .from('deliveries')
+        .select('id');
+
       const totalPharmacies = pharmacies?.length || 0;
       const pendingPharmacies = pharmacies?.filter(p => p.verification_status === 'pending').length || 0;
       const totalUsers = users?.length || 0;
       const totalProducts = products?.length || 0;
       const totalOrders = orders?.length || 0;
       const totalRevenue = orders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
+      const totalDeliveries = deliveries?.length || 0;
 
       setStats({
         totalPharmacies,
@@ -66,6 +75,7 @@ const AdminDashboard = () => {
         totalProducts,
         totalOrders,
         totalRevenue,
+        totalDeliveries,
       });
     } catch (error) {
       console.error('Error fetching admin stats:', error);
@@ -156,6 +166,19 @@ const AdminDashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Deliveries</CardTitle>
+              <Truck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalDeliveries}</div>
+              <p className="text-xs text-muted-foreground">
+                Deliveries managed
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Platform Revenue</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -187,41 +210,50 @@ const AdminDashboard = () => {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a 
-              href="/admin/pharmacies" 
+            <Link
+              to="/admin/pharmacies"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
               <Store className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-semibold">Manage Pharmacies</h3>
               <p className="text-sm text-muted-foreground">Verify and manage pharmacy registrations</p>
-            </a>
+            </Link>
 
-            <a 
-              href="/admin/users" 
+            <Link
+              to="/admin/users"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
               <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-semibold">User Management</h3>
               <p className="text-sm text-muted-foreground">View and manage platform users</p>
-            </a>
+            </Link>
 
-            <a 
-              href="/admin/products" 
+            <Link
+              to="/admin/products"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
               <Package className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-semibold">Product Overview</h3>
               <p className="text-sm text-muted-foreground">Monitor product catalog</p>
-            </a>
+            </Link>
 
-            <a 
-              href="/admin/orders" 
+            <Link
+              to="/admin/orders"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
               <FileText className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-semibold">Order Management</h3>
               <p className="text-sm text-muted-foreground">Monitor platform orders</p>
-            </a>
+            </Link>
+
+            <Link
+              to="/admin/deliveries"
+              className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
+            >
+              <Truck className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <h3 className="font-semibold">Delivery Management</h3>
+              <p className="text-sm text-muted-foreground">Manage deliveries and agents</p>
+            </Link>
           </CardContent>
         </Card>
 
@@ -239,12 +271,12 @@ const AdminDashboard = () => {
                 <p className="text-orange-800">
                   <strong>{stats.pendingPharmacies} pharmacy registrations</strong> are waiting for your verification.
                 </p>
-                <a 
-                  href="/admin/pharmacies" 
+                <Link
+                  to="/admin/pharmacies"
                   className="text-primary hover:underline mt-2 inline-block"
                 >
                   Review pending applications →
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>
