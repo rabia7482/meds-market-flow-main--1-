@@ -141,7 +141,7 @@ const Cart = () => {
                           <h3 className="font-semibold">{item.name}</h3>
                           <p className="text-sm text-muted-foreground">{item.pharmacy_name}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-lg font-bold text-primary">₦{item.price}</span>
+                            <span className="text-lg font-bold text-cyan-600">₦{item.price}</span>
                           </div>
                         </div>
                         <Button
@@ -205,7 +205,7 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span className="text-primary">₦{totalPrice.toFixed(2)}</span>
+                    <span className="text-cyan-600">₦{totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -231,7 +231,7 @@ const Cart = () => {
 
 
                 <Button 
-                  className="w-full" 
+                  className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 hover:bg-gray-200" 
                   onClick={handleCheckout}
                   disabled={loading}
                 >

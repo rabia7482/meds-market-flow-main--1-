@@ -247,6 +247,71 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          plan_name: string
+          billing_period: string
+          amount: number
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          address: string | null
+          city: string | null
+          state: string | null
+          payment_method: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          plan_name: string
+          billing_period: string
+          amount: number
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          address?: string | null
+          city?: string | null
+          state?: string | null
+          payment_method?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          plan_name?: string
+          billing_period?: string
+          amount?: number
+          first_name?: string
+          last_name?: string
+          email?: string
+          phone?: string
+          address?: string | null
+          city?: string | null
+          state?: string | null
+          payment_method?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

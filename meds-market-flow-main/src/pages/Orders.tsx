@@ -154,7 +154,7 @@ const Orders = () => {
                         {getStatusIcon(order.status)}
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </Badge>
-                      <span className="text-lg font-bold text-primary">
+                      <span className="text-lg font-bold text-cyan-600">
                         ₦{order.total_amount}
                       </span>
                     </div>

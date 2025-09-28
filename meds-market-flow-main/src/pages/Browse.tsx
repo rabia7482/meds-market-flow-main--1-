@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -7,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Search, ShoppingCart, Package, Star, Heart, Eye } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Search, ShoppingCart, Package, Star, Heart, Eye, Info, AlertTriangle, Thermometer, Factory } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/hooks/useCart';
 
@@ -219,6 +221,55 @@ const Browse = () => {
                             {product.description}
                           </p>
 
+                          {/* Product Details Accordion */}
+                          <Accordion type="single" collapsible className="w-full">
+                            <AccordionItem value={`details-${product.id}`} className="border-0">
+                              <AccordionTrigger className="py-1 px-2 hover:bg-gray-50 rounded text-xs text-cyan-600 hover:text-cyan-700">
+                                <div className="flex items-center gap-1">
+                                  <Info className="h-3 w-3" />
+                                  More Info
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent className="px-2 pb-2">
+                                <div className="space-y-2 text-xs">
+                                  {product.dosage && (
+                                    <div className="flex items-start gap-2">
+                                      <Package className="h-3 w-3 text-cyan-500 mt-0.5 flex-shrink-0" />
+                                      <div>
+                                        <p className="font-medium text-gray-700">Dosage:</p>
+                                        <p className="text-gray-600">{product.dosage}</p>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  <div className="flex items-start gap-2">
+                                    <AlertTriangle className="h-3 w-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="font-medium text-gray-700">Important:</p>
+                                      <p className="text-gray-600">Consult your healthcare provider before use. Keep out of reach of children.</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-start gap-2">
+                                    <Thermometer className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="font-medium text-gray-700">Storage:</p>
+                                      <p className="text-gray-600">Store in a cool, dry place away from direct sunlight.</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-start gap-2">
+                                    <Factory className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="font-medium text-gray-700">Manufacturer:</p>
+                                      <p className="text-gray-600">{product.brand || 'Not specified'}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+
                           {/* Price and Stock */}
                           <div className="flex items-center justify-between">
                             <div>
@@ -310,6 +361,47 @@ const Browse = () => {
                           </CardTitle>
                           <p className="text-xs text-cyan-600 font-medium truncate">{product.brand}</p>
                         </div>
+
+                        {/* Product Details Accordion */}
+                        <Accordion type="single" collapsible className="w-full">
+                          <AccordionItem value={`grid-details-${product.id}`} className="border-0">
+                            <AccordionTrigger className="py-0.5 px-1 hover:bg-gray-50 rounded text-xs text-cyan-600 hover:text-cyan-700">
+                              <div className="flex items-center gap-1">
+                                <Info className="h-2.5 w-2.5" />
+                                More Info
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="px-1 pb-1">
+                              <div className="space-y-1.5 text-xs">
+                                {product.dosage && (
+                                  <div className="flex items-start gap-1.5">
+                                    <Package className="h-2.5 w-2.5 text-cyan-500 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="font-medium text-gray-700">Dosage:</p>
+                                      <p className="text-gray-600">{product.dosage}</p>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="flex items-start gap-1.5">
+                                  <AlertTriangle className="h-2.5 w-2.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                                  <div>
+                                    <p className="font-medium text-gray-700">Important:</p>
+                                    <p className="text-gray-600">Consult healthcare provider before use.</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-start gap-1.5">
+                                  <Thermometer className="h-2.5 w-2.5 text-blue-500 mt-0.5 flex-shrink-0" />
+                                  <div>
+                                    <p className="font-medium text-gray-700">Storage:</p>
+                                    <p className="text-gray-600">Cool, dry place away from sunlight.</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
 
                         {/* Price and Stock */}
                         <div className="space-y-1">

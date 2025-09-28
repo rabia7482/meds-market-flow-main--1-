@@ -112,7 +112,7 @@ const Index = () => {
         {/* Action Buttons */}
         <div className="text-center space-y-6">
           <div className="space-x-4">
-            <Button size="lg" className="bg-cyan-900 hover:bg-gray-200" asChild>
+            <Button size="lg" className="bg-gradient-to-r from-cyan-700 to-blue-700 hover:bg-gray-200" asChild>
               <a href="/browse">Browse Medications</a>
             </Button>
             <Button size="lg" variant="outline" asChild>

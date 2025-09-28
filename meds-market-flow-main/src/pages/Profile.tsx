@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar as CalendarIcon } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -24,6 +28,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [date, setDate] = useState<Date | undefined>();
 
   useEffect(() => {
     if (user) {
@@ -41,6 +46,9 @@ const Profile = () => {
 
       if (error) throw error;
       setProfile(data);
+      if (data?.date_of_birth) {
+        setDate(new Date(data.date_of_birth));
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -60,7 +68,7 @@ const Profile = () => {
         full_name: formData.get('full_name') as string,
         phone: formData.get('phone') as string,
         address: formData.get('address') as string,
-        date_of_birth: formData.get('date_of_birth') as string,
+        date_of_birth: date ? date.toISOString().split('T')[0] : '',
       };
 
       const { error } = await supabase
@@ -104,7 +112,7 @@ const Profile = () => {
     <DashboardLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center">
-          <User className="h-12 w-12 text-primary mx-auto mb-4" />
+          <User className="h-12 w-12 text-cyan-600 mx-auto mb-4" />
           <h1 className="text-3xl font-bold">My Profile</h1>
           <p className="text-muted-foreground">Manage your personal information</p>
         </div>
@@ -162,16 +170,28 @@ const Profile = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="date_of_birth">Date of Birth</Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="date_of_birth"
-                    name="date_of_birth"
-                    type="date"
-                    defaultValue={profile?.date_of_birth || ''}
-                    className="pl-10"
-                  />
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
@@ -188,7 +208,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={saving}>
+              <Button type="submit" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600" disabled={saving}>
                 {saving ? "Saving..." : "Save Changes"}
               </Button>
             </form>

@@ -75,8 +75,8 @@ export function AppSidebar() {
       <SidebarContent>
         <div className="p-4 border-b">
           <div className="flex items-center space-x-2">
-            <Pill className="h-6 w-6 text-primary" />
-            {!isCollapsed && <span className="font-bold text-primary">MedsMarket</span>}
+            <Pill className="h-6 w-6 text-cyan-600" />
+            {!isCollapsed && <span className="font-bold text-cyan-600">MedsMarket</span>}
           </div>
         </div>
 

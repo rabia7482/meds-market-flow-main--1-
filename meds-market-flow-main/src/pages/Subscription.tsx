@@ -8,14 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Check, 
-  Star, 
-  Shield, 
-  Clock, 
-  Truck, 
-  Phone, 
-  Heart, 
+import {
+  Check,
+  Star,
+  Shield,
+  Clock,
+  Truck,
+  Phone,
+  Heart,
   CreditCard,
   User,
   Mail,
@@ -23,12 +23,14 @@ import {
   Calendar
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SubscriptionPlan {
   id: string;
   name: string;
-  price: number;
-  period: string;
+  basePrice: number;
+  yearlyPrice: number;
   description: string;
   features: string[];
   popular?: boolean;
@@ -38,6 +40,7 @@ interface SubscriptionPlan {
 const Subscription = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>('premium');
   const [isYearly, setIsYearly] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -50,13 +53,14 @@ const Subscription = () => {
     agreeToTerms: false
   });
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const plans: SubscriptionPlan[] = [
     {
       id: 'basic',
       name: 'Basic',
-      price: isYearly ? 2400 : 250,
-      period: isYearly ? 'year' : 'month',
+      basePrice: 250,
+      yearlyPrice: 2400,
       description: 'Essential medication delivery service',
       color: 'from-blue-500 to-blue-600',
       features: [
@@ -70,8 +74,8 @@ const Subscription = () => {
     {
       id: 'premium',
       name: 'Premium',
-      price: isYearly ? 4800 : 500,
-      period: isYearly ? 'year' : 'month',
+      basePrice: 500,
+      yearlyPrice: 4800,
       description: 'Enhanced healthcare experience',
       color: 'from-cyan-500 to-cyan-600',
       popular: true,
@@ -89,8 +93,8 @@ const Subscription = () => {
     {
       id: 'vip',
       name: 'VIP',
-      price: isYearly ? 9600 : 1000,
-      period: isYearly ? 'year' : 'month',
+      basePrice: 1000,
+      yearlyPrice: 9600,
       description: 'Premium healthcare concierge service',
       color: 'from-purple-500 to-purple-600',
       features: [
@@ -115,7 +119,7 @@ const Subscription = () => {
     }));
   };
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!formData.agreeToTerms) {
       toast({
         title: "Terms Required",
@@ -134,11 +138,100 @@ const Subscription = () => {
       return;
     }
 
-    // Here you would integrate with your payment processor
-    toast({
-      title: "Subscription Successful!",
-      description: `Welcome to ${plans.find(p => p.id === selectedPlan)?.name} plan! You'll receive a confirmation email shortly.`,
-    });
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "Please sign in to subscribe.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const selectedPlanData = plans.find(plan => plan.id === selectedPlan);
+      if (!selectedPlanData) {
+        throw new Error('Selected plan not found');
+      }
+
+      const price = isYearly ? selectedPlanData.yearlyPrice : selectedPlanData.basePrice;
+      const billingPeriod = isYearly ? 'yearly' : 'monthly';
+      const period = isYearly ? 'year' : 'month';
+
+      // Prepare subscription data
+      const subscriptionData = {
+        user_id: user.id,
+        plan_name: selectedPlanData.name,
+        billing_period: billingPeriod,
+        amount: price,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        payment_method: formData.paymentMethod,
+      };
+
+      // Insert subscription into database
+      const { error: insertError } = await supabase
+        .from('subscriptions')
+        .insert(subscriptionData);
+
+      if (insertError) {
+        throw new Error(`Failed to save subscription: ${insertError.message}`);
+      }
+
+      // Send confirmation email via Edge Function
+      const { error: emailError } = await supabase.functions.invoke(
+        'send-subscription-email',
+        {
+          body: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            planName: selectedPlanData.name,
+            amount: price,
+            billingPeriod: billingPeriod.charAt(0).toUpperCase() + billingPeriod.slice(1),
+          },
+        }
+      );
+
+      if (emailError) {
+        console.error('Email sending failed:', emailError);
+        // Don't fail the subscription if email fails, just log it
+      }
+
+      // Success toast
+      toast({
+        title: "Subscription Successful!",
+        description: `Welcome to ${selectedPlanData.name} plan! You'll receive a confirmation email shortly.`,
+      });
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        paymentMethod: '',
+        agreeToTerms: false
+      });
+
+    } catch (error) {
+      toast({
+        title: "Subscription Failed",
+        description: error instanceof Error ? error.message : 'An unexpected error occurred.',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const selectedPlanData = plans.find(plan => plan.id === selectedPlan);
@@ -204,8 +297,8 @@ const Subscription = () => {
                 <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                 <div className="space-y-2">
                   <div className="text-4xl font-bold text-cyan-600">
-                    ₦{plan.price.toLocaleString()}
-                    <span className="text-lg text-muted-foreground">/{plan.period}</span>
+                    ₦{(isYearly ? plan.yearlyPrice : plan.basePrice).toLocaleString()}
+                    <span className="text-lg text-muted-foreground">/{isYearly ? 'year' : 'month'}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{plan.description}</p>
                 </div>
@@ -421,31 +514,40 @@ const Subscription = () => {
                     </div>
                     <div className="flex justify-between">
                       <span>Price:</span>
-                      <span className="font-medium">₦{selectedPlanData?.price.toLocaleString()}</span>
+                      <span className="font-medium">₦{(selectedPlanData ? (isYearly ? selectedPlanData.yearlyPrice : selectedPlanData.basePrice) : 0).toLocaleString()}</span>
                     </div>
                     {isYearly && (
                       <div className="flex justify-between text-green-600">
                         <span>Savings:</span>
-                        <span className="font-medium">₦{((selectedPlanData?.price || 0) * 12 * 0.2).toLocaleString()}</span>
+                        <span className="font-medium">₦{((selectedPlanData?.basePrice || 0) * 12 * 0.2).toLocaleString()}</span>
                       </div>
                     )}
                     <Separator />
                     <div className="flex justify-between font-semibold">
                       <span>Total:</span>
-                      <span>₦{selectedPlanData?.price.toLocaleString()}</span>
+                      <span>₦{(selectedPlanData ? (isYearly ? selectedPlanData.yearlyPrice : selectedPlanData.basePrice) : 0).toLocaleString()}</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Subscribe Button */}
-              <Button 
+              <Button
                 className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold py-3 text-lg"
                 onClick={handleSubscribe}
-                disabled={!formData.agreeToTerms}
+                disabled={!formData.agreeToTerms || isLoading}
               >
-                <CreditCard className="h-5 w-5 mr-2" />
-                Subscribe Now - ₦{selectedPlanData?.price.toLocaleString()}
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    Subscribe Now - ₦{(selectedPlanData ? (isYearly ? selectedPlanData.yearlyPrice : selectedPlanData.basePrice) : 0).toLocaleString()}
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>

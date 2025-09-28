@@ -148,7 +148,7 @@ const PharmacyOrders = () => {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto"></div>
             <p className="mt-2 text-muted-foreground">Loading orders...</p>
           </div>
         </div>
@@ -209,7 +209,7 @@ const PharmacyOrders = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <span className="text-lg font-bold text-primary">
+                        <span className="text-lg font-bold text-cyan-600">
                           ₦{order.total_amount}
                         </span>
                       </div>
@@ -257,14 +257,14 @@ const PharmacyOrders = () => {
                       <>
                         <Button 
                           onClick={() => updateOrderStatus(order.id, 'approved')}
-                          className="flex-1"
+                          className="flex-1 bg-gradient-to-r from-cyan-700 to-blue-700"
                         >
                           Confirm Order
                         </Button>
                         <Button 
                           variant="outline"
                           onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive bg-gradient-to-r from-cyan-700 to-blue-700"
                         >
                           Cancel
                         </Button>
@@ -274,7 +274,7 @@ const PharmacyOrders = () => {
                     {order.status === 'approved' && (
                       <Button 
                         onClick={() => updateOrderStatus(order.id, 'delivered')}
-                        className="flex-1"
+                        className="flex-1 bg-gradient-to-r from-cyan-700 to-blue-700"
                       >
                         Mark as Delivered
                       </Button>

@@ -56,7 +56,7 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">MedsMarket</CardTitle>
+          <CardTitle className="text-2xl font-bold text-cyan-500">MedsMarket</CardTitle>
           <CardDescription>Your trusted online pharmacy</CardDescription>
         </CardHeader>
         <CardContent>
@@ -88,7 +88,7 @@ const Auth = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
@@ -127,7 +127,7 @@ const Auth = () => {
                     minLength={6}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Sign Up"}
                 </Button>
               </form>

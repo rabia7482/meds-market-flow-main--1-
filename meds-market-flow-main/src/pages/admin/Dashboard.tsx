@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
@@ -187,41 +188,41 @@ const AdminDashboard = () => {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a 
-              href="/admin/pharmacies" 
+            <Link
+              to="/admin/pharmacies"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
-              <Store className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <Store className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">Manage Pharmacies</h3>
               <p className="text-sm text-muted-foreground">Verify and manage pharmacy registrations</p>
-            </a>
+            </Link>
 
-            <a 
-              href="/admin/users" 
+            <Link
+              to="/admin/users"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
-              <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <Users className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">User Management</h3>
               <p className="text-sm text-muted-foreground">View and manage platform users</p>
-            </a>
+            </Link>
 
-            <a 
-              href="/admin/products" 
+            <Link
+              to="/admin/products"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
-              <Package className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <Package className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">Product Overview</h3>
               <p className="text-sm text-muted-foreground">Monitor product catalog</p>
-            </a>
+            </Link>
 
-            <a 
-              href="/admin/orders" 
+            <Link
+              to="/admin/orders"
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
-              <FileText className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <FileText className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">Order Management</h3>
               <p className="text-sm text-muted-foreground">Monitor platform orders</p>
-            </a>
+            </Link>
           </CardContent>
         </Card>
 
@@ -239,12 +240,12 @@ const AdminDashboard = () => {
                 <p className="text-orange-800">
                   <strong>{stats.pendingPharmacies} pharmacy registrations</strong> are waiting for your verification.
                 </p>
-                <a 
-                  href="/admin/pharmacies" 
-                  className="text-primary hover:underline mt-2 inline-block"
+                <Link 
+                  to="/admin/pharmacies" 
+                  className="text-cyan-600 hover:underline mt-2 inline-block"
                 >
                   Review pending applications →
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>

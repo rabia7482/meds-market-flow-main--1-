@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,10 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, Eye, EyeOff, Calendar as CalendarIcon } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -36,12 +40,21 @@ const PharmacyProducts = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [expiryDate, setExpiryDate] = useState<Date | undefined>();
 
   useEffect(() => {
     if (user) {
       fetchProducts();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (editingProduct?.expiry_date) {
+      setExpiryDate(new Date(editingProduct.expiry_date));
+    } else {
+      setExpiryDate(undefined);
+    }
+  }, [editingProduct]);
 
   const fetchProducts = async () => {
     try {
@@ -80,7 +93,7 @@ const PharmacyProducts = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     const formData = new FormData(e.currentTarget);
     const productData = {
       name: formData.get('name') as string,
@@ -91,7 +104,7 @@ const PharmacyProducts = () => {
       price: parseFloat(formData.get('price') as string),
       stock_quantity: parseInt(formData.get('stock_quantity') as string),
       is_active: formData.get('is_active') === 'on',
-      expiry_date: formData.get('expiry_date') as string || null,
+      expiry_date: expiryDate ? expiryDate.toISOString().split('T')[0] : null,
       image_url: formData.get('image_url') as string || null,
     };
 
@@ -153,7 +166,7 @@ const PharmacyProducts = () => {
       setProducts(products.map(p => 
         p.id === product.id ? { ...p, is_active: !p.is_active } : p
       ));
-      
+
       toast({
         title: `Product ${!product.is_active ? 'activated' : 'deactivated'}`,
       });
@@ -195,7 +208,7 @@ const PharmacyProducts = () => {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto"></div>
             <p className="mt-2 text-muted-foreground">Loading products...</p>
           </div>
         </div>
@@ -214,7 +227,10 @@ const PharmacyProducts = () => {
           
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setEditingProduct(null)}>
+              <Button  className="bg-gradient-to-r from-cyan-700 to-blue-700" onClick={() => {
+                setEditingProduct(null);
+                setExpiryDate(undefined);
+              }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
               </Button>
@@ -313,12 +329,28 @@ const PharmacyProducts = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="expiry_date">Expiry Date</Label>
-                    <Input
-                      id="expiry_date"
-                      name="expiry_date"
-                      type="date"
-                      defaultValue={editingProduct?.expiry_date || ''}
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !expiryDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {expiryDate ? format(expiryDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={expiryDate}
+                          onSelect={setExpiryDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="image_url">Image URL</Label>
@@ -399,7 +431,7 @@ const PharmacyProducts = () => {
 
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-xl font-bold text-primary">₦{product.price}</p>
+                      <p className="text-xl font-bold text-cyan-500">₦{product.price}</p>
                       <p className="text-sm text-muted-foreground">
                         Stock: {product.stock_quantity}
                       </p>
@@ -424,6 +456,7 @@ const PharmacyProducts = () => {
                       {product.is_active ? (
                         <>
                           <EyeOff className="h-3 w-3 mr-1" />
+
                           Deactivate
                         </>
                       ) : (

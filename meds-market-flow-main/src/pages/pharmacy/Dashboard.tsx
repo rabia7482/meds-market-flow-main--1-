@@ -164,10 +164,10 @@ const PharmacyDashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active Products</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-cyan-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.activeProducts}</div>
+              <div className="text-2xl font-bold text-cyan-600">{stats.activeProducts}</div>
               <p className="text-xs text-muted-foreground">
                 Products available for sale
               </p>
@@ -185,7 +185,7 @@ const PharmacyDashboard = () => {
               href="/pharmacy/products" 
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
-              <Package className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <Package className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">Manage Products</h3>
               <p className="text-sm text-muted-foreground">Add or update your inventory</p>
             </a>
@@ -194,7 +194,7 @@ const PharmacyDashboard = () => {
               href="/pharmacy/orders" 
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
-              <ShoppingCart className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <ShoppingCart className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">View Orders</h3>
               <p className="text-sm text-muted-foreground">Process customer orders</p>
             </a>
@@ -203,7 +203,7 @@ const PharmacyDashboard = () => {
               href="/pharmacy/profile" 
               className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
             >
-              <FileText className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <FileText className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">Pharmacy Profile</h3>
               <p className="text-sm text-muted-foreground">Update pharmacy information</p>
             </a>
