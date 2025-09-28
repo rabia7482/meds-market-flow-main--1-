@@ -72,21 +72,37 @@ const Orders = () => {
           id,
           order_id,
           status_delivery,
-          profiles!deliveries_delivery_agent_id_fkey(full_name)
+          delivery_agent_id
         `)
         .in('order_id', orderIds);
 
       if (deliveriesError) throw deliveriesError;
 
-      // Transform orders with deliveries
-      const transformedOrders = ordersData?.map(order => ({
-        ...order,
-        delivery: deliveriesData?.find(d => d.order_id === order.id) ? {
-          id: deliveriesData.find(d => d.order_id === order.id)!.id,
-          status_delivery: deliveriesData.find(d => d.order_id === order.id)!.status_delivery,
-          delivery_agent: (deliveriesData.find(d => d.order_id === order.id)!.profiles as any)?.full_name || 'Unknown'
-        } : undefined
-      })) || [];
+      // Fetch delivery agent profiles
+      const deliveryAgentIds = deliveriesData?.map(d => d.delivery_agent_id).filter(Boolean) || [];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', deliveryAgentIds);
+
+      // Transform orders with deliveries and handle null pharmacy/product
+      const transformedOrders = ordersData?.map(order => {
+        const delivery = deliveriesData?.find(d => d.order_id === order.id);
+        const agentProfile = profilesData?.find(p => p.user_id === delivery?.delivery_agent_id);
+        return {
+          ...order,
+          pharmacy: order.pharmacy || { name: 'Unknown Pharmacy' },
+          order_items: order.order_items?.map(item => ({
+            ...item,
+            product: item.product || { name: 'Unknown Product', brand: '' }
+          })) || [],
+          delivery: delivery ? {
+            id: delivery.id,
+            status_delivery: delivery.status_delivery,
+            delivery_agent: agentProfile?.full_name || 'Unknown'
+          } : undefined
+        };
+      }) || [];
 
       setOrders(transformedOrders);
     } catch (error) {
@@ -160,7 +176,7 @@ const Orders = () => {
               <p className="text-muted-foreground mb-4">
                 Start shopping to place your first order
               </p>
-              <Button className="mt-auto" onClick={() => window.location.href = '/browse'}>
+              <Button className="mt-auto bg-gradient-to-r from-cyan-600 to-blue-600" onClick={() => window.location.href = '/browse'}>
                 Browse Medications
               </Button>
             </CardContent>

@@ -85,22 +85,37 @@ const PharmacyOrders = () => {
           order_id,
           status_delivery,
           confirmed_by_pharmacy,
-          profiles!deliveries_delivery_agent_id_fkey(full_name)
+          delivery_agent_id
         `)
         .in('order_id', orderIds);
 
       if (deliveriesError) throw deliveriesError;
 
+      // Fetch delivery agent profiles
+      const deliveryAgentIds = deliveriesData?.map(d => d.delivery_agent_id).filter(Boolean) || [];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', deliveryAgentIds);
+
       // Transform orders with deliveries
-      const transformedOrders = ordersData?.map(order => ({
-        ...order,
-        delivery: deliveriesData?.find(d => d.order_id === order.id) ? {
-          id: deliveriesData.find(d => d.order_id === order.id)!.id,
-          status_delivery: deliveriesData.find(d => d.order_id === order.id)!.status_delivery,
-          delivery_agent: (deliveriesData.find(d => d.order_id === order.id)!.profiles as any)?.full_name || 'Unknown',
-          confirmed_by_pharmacy: deliveriesData.find(d => d.order_id === order.id)!.confirmed_by_pharmacy
-        } : undefined
-      })) || [];
+      const transformedOrders = ordersData?.map(order => {
+        const delivery = deliveriesData?.find(d => d.order_id === order.id);
+        const agentProfile = profilesData?.find(p => p.user_id === delivery?.delivery_agent_id);
+        return {
+          ...order,
+          order_items: order.order_items?.map(item => ({
+            ...item,
+            products: item.products || { name: 'Unknown Product', brand: '' }
+          })) || [],
+          delivery: delivery ? {
+            id: delivery.id,
+            status_delivery: delivery.status_delivery,
+            delivery_agent: agentProfile?.full_name || 'Unknown',
+            confirmed_by_pharmacy: delivery.confirmed_by_pharmacy
+          } : undefined
+        };
+      }) || [];
 
       setOrders(transformedOrders);
     } catch (error) {

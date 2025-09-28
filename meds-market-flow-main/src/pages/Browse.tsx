@@ -185,7 +185,7 @@ const Browse = () => {
                           {/* Action Buttons */}
                           <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <Button size="sm" variant="secondary" className="h-6 w-6 p-0 rounded-full shadow-lg">
-                              <Heart className="h-3 w-3" />
+                              <Heart className="h-3 w-3 bg-gradient-to-r from-cyan-600 to-blue-600" />
                             </Button>
                             <Button size="sm" variant="secondary" className="h-6 w-6 p-0 rounded-full shadow-lg">
                               <Eye className="h-3 w-3" />

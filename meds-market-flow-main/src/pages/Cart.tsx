@@ -112,7 +112,7 @@ const Cart = () => {
           <p className="text-muted-foreground mb-6">
             Start shopping to add items to your cart
           </p>
-          <Button onClick={() => navigate('/browse')}>
+          <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 "onClick={() => navigate('/browse')}>
             Browse Medications
           </Button>
         </div>
