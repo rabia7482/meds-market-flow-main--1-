@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Search, Mail, Calendar, MapPin } from 'lucide-react';
+import { Users, Search, Mail, Calendar, MapPin, Truck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface User {
   id: string;
@@ -16,6 +17,7 @@ interface User {
   created_at: string;
   user_id: string;
   roles: string[];
+  deliveries_count: number;
 }
 
 const AdminUsers = () => {
@@ -44,10 +46,24 @@ const AdminUsers = () => {
 
       if (rolesError) throw rolesError;
 
+      // Fetch deliveries count per user
+      const { data: deliveries, error: deliveriesError } = await supabase
+        .from('deliveries')
+        .select('delivery_agent_id');
+
+      if (deliveriesError) throw deliveriesError;
+
+      // Count deliveries per user
+      const deliveriesCount = deliveries?.reduce((acc, d) => {
+        acc[d.delivery_agent_id] = (acc[d.delivery_agent_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>) || {};
+
       // Transform the data to include roles array
       const usersWithRoles = profiles?.map(profile => ({
         ...profile,
-        roles: userRoles?.filter(ur => ur.user_id === profile.user_id).map(ur => ur.role) || []
+        roles: userRoles?.filter(ur => ur.user_id === profile.user_id).map(ur => ur.role) || [],
+        deliveries_count: deliveriesCount[profile.user_id] || 0
       })) || [];
 
       setUsers(usersWithRoles);
@@ -140,6 +156,18 @@ const AdminUsers = () => {
                       <div className="flex gap-2 mt-1">
                         {user.roles.map(role => getRoleBadge(role))}
                       </div>
+                      {user.deliveries_count > 0 && (
+                        <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
+                          <Truck className="h-3 w-3" />
+                          <span>{user.deliveries_count} delivery{user.deliveries_count > 1 ? 'ies' : 'y'} assigned</span>
+                          <Link
+                            to={`/admin/deliveries?agent=${user.user_id}`}
+                            className="text-primary hover:underline ml-1"
+                          >
+                            View
+                          </Link>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

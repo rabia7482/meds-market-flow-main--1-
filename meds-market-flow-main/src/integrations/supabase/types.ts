@@ -59,6 +59,67 @@ export type Database = {
           },
         ]
       }
+      deliveries: {
+        Row: {
+          confirmed_by_admin: boolean
+          confirmed_by_pharmacy: boolean
+          created_at: string
+          delivery_agent_id: string
+          delivered_at: string | null
+          id: string
+          order_id: string
+          pharmacy_id: string
+          status_delivery: Database["public"]["Enums"]["status_delivery"]
+          updated_at: string
+        }
+        Insert: {
+          confirmed_by_admin?: boolean
+          confirmed_by_pharmacy?: boolean
+          created_at?: string
+          delivery_agent_id: string
+          delivered_at?: string | null
+          id?: string
+          order_id: string
+          pharmacy_id: string
+          status_delivery?: Database["public"]["Enums"]["status_delivery"]
+          updated_at?: string
+        }
+        Update: {
+          confirmed_by_admin?: boolean
+          confirmed_by_pharmacy?: boolean
+          created_at?: string
+          delivery_agent_id?: string
+          delivered_at?: string | null
+          id?: string
+          order_id?: string
+          pharmacy_id?: string
+          status_delivery?: Database["public"]["Enums"]["status_delivery"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_delivery_agent_id_fkey"
+            columns: ["delivery_agent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -347,7 +408,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "pharmacy" | "customer"
+      app_role: "admin" | "pharmacy" | "customer" | "delivery_agent"
       order_status:
         | "pending"
         | "approved"
@@ -362,6 +423,7 @@ export type Database = {
         | "cosmetics"
         | "medical_devices"
       verification_status: "pending" | "approved" | "rejected"
+      status_delivery:  "pending" | "in-transit" | "delivered"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -489,7 +551,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "pharmacy", "customer"],
+      app_role: ["admin", "pharmacy", "customer", "delivery_agent"],
       order_status: [
         "pending",
         "approved",
@@ -505,6 +567,7 @@ export const Constants = {
         "medical_devices",
       ],
       verification_status: ["pending", "approved", "rejected"],
+      status_delivery: ["pending", "in-transit", "delivered"],
     },
   },
 } as const

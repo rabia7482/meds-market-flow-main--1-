@@ -21,6 +21,8 @@ import AdminPharmacies from "./pages/admin/Pharmacies";
 import AdminUsers from "./pages/admin/Users";
 import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
+import AdminDeliveries from "./pages/admin/Deliveries";
+import DeliveryDashboard from "./pages/delivery/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,7 +56,11 @@ const App = () => (
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
-              
+              <Route path="/admin/deliveries" element={<AdminDeliveries />} />
+
+              {/* Delivery Agent Routes */}
+              <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

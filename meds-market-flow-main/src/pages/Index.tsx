@@ -28,9 +28,13 @@ const Index = () => {
   if (role === 'admin') {
     return <Navigate to="/admin/dashboard" replace />;
   }
-  
+
   if (role === 'pharmacy') {
     return <Navigate to="/pharmacy/dashboard" replace />;
+  }
+
+  if (role === 'delivery_agent') {
+    return <Navigate to="/delivery/dashboard" replace />;
   }
 
   return (
