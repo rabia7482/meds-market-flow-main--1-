@@ -95,7 +95,7 @@ create table public.deliveries (
   order_id uuid not null references public.orders(id) on delete cascade,
   pharmacy_id uuid not null references public.pharmacies(id) on delete cascade,
   delivery_agent_id uuid not null references auth.users(id) on delete cascade,
-  status text not null default 'pending',
+  status_delivery text not null default 'pending',
   confirmed_by_admin boolean not null default false,
   confirmed_by_pharmacy boolean not null default false,
   delivered_at timestamp with time zone,
