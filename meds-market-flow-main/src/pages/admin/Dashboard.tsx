@@ -244,7 +244,16 @@ const AdminDashboard = () => {
               <FileText className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
               <h3 className="font-semibold">Order Management</h3>
               <p className="text-sm text-muted-foreground">Monitor platform orders</p>
-            </a>
+            </Link>
+
+            <Link
+              to="/admin/deliveries"
+              className="p-4 border rounded-lg hover:bg-accent transition-colors text-center"
+            >
+              <Truck className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
+              <h3 className="font-semibold">Delivery Management</h3>
+              <p className="text-sm text-muted-foreground">Manage deliveries and agents</p>
+            </Link>
           </CardContent>
         </Card>
 
@@ -262,9 +271,9 @@ const AdminDashboard = () => {
                 <p className="text-orange-800">
                   <strong>{stats.pendingPharmacies} pharmacy registrations</strong> are waiting for your verification.
                 </p>
-                <a 
-                  href="/admin/pharmacies" 
-                  className="text-primary hover:underline mt-2 inline-block"
+                <Link
+                  to="/admin/pharmacies"
+                  className="text-cyan-600 hover:underline mt-2 inline-block"
                 >
                   Review pending applications →
                 </Link>
