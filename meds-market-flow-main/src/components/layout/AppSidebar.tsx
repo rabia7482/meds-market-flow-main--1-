@@ -9,7 +9,8 @@ import {
   Settings,
   Pill,
   Crown,
-  Bike
+  Bike,
+  Truck
 } from "lucide-react";
 import {
   Sidebar,
