@@ -11,6 +11,8 @@ import Browse from "./pages/Browse";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
+import PartnerSignup from "./pages/PartnerSignup";
+import PartnerOrders from "./pages/PartnerOrders";
 import Subscription from "./pages/Subscription";
 import PharmacyRegister from "./pages/PharmacyRegister";
 import PharmacyDashboard from "./pages/pharmacy/Dashboard";
@@ -42,6 +44,8 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/partner-signup" element={<PartnerSignup />} />
+              <Route path="/partner/orders" element={<PartnerOrders />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/pharmacy-register" element={<PharmacyRegister />} />
               

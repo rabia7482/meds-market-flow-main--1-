@@ -9,7 +9,7 @@ import {
   Settings,
   Pill,
   Crown,
-  Truck
+  Bike
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,6 +29,7 @@ const customerItems = [
   { title: "Cart", url: "/cart", icon: ShoppingCart },
   { title: "Orders", url: "/orders", icon: FileText },
   { title: "Subscription", url: "/subscription", icon: Crown },
+  { title: "Partner Signup", url: "/partner-signup", icon: Bike },
   { title: "Profile", url: "/profile", icon: Settings },
 ];
 
