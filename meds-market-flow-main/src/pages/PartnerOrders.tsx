@@ -8,6 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Bike, Search, TimerReset, CheckCircle2, Navigation, Phone, Package, MapPin } from 'lucide-react';
 
+// Page for delivery partners to view and manage their assigned deliveries.
+// Includes local demo data, simple filtering, and two views: Active and Completed.
+
 type OrderStatus = 'pending_pickup' | 'in_transit' | 'delivered' | 'cancelled';
 
 interface PartnerOrder {
@@ -23,6 +26,7 @@ interface PartnerOrder {
   eta: string;
 }
 
+// Static demo dataset used for presentation. Replace with API data when backend is ready.
 const STATIC_ORDERS: PartnerOrder[] = [
   {
     id: '1',
@@ -74,6 +78,7 @@ const STATIC_ORDERS: PartnerOrder[] = [
   },
 ];
 
+// Small UI helper that maps an order status to a colored Badge component.
 const statusBadge = (status: OrderStatus) => {
   switch (status) {
     case 'pending_pickup':
@@ -87,10 +92,13 @@ const statusBadge = (status: OrderStatus) => {
   }
 };
 
+// Main component: renders search, tabs, and two tables for active vs completed orders.
 const PartnerOrders = () => {
+  // Local UI state: search query and the currently active tab.
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<'active' | 'completed'>('active');
 
+  // Derive a filtered list based on the search query (memoized for performance).
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     const list = STATIC_ORDERS.filter(o =>
@@ -102,12 +110,14 @@ const PartnerOrders = () => {
     return list;
   }, [search]);
 
+  // Split filtered results into active and completed groups for the two tabs.
   const activeOrders = filtered.filter(o => o.status === 'pending_pickup' || o.status === 'in_transit');
   const completedOrders = filtered.filter(o => o.status === 'delivered' || o.status === 'cancelled');
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Partner Orders</h1>
@@ -118,6 +128,7 @@ const PartnerOrders = () => {
           </Badge>
         </div>
 
+        {/* Search input filters by code, patient, address, or pharmacy */}
         <div className="flex items-center gap-3">
           <div className="relative flex-1 max-w-xl">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -125,6 +136,7 @@ const PartnerOrders = () => {
           </div>
         </div>
 
+        {/* Tabs switch between Active and Completed deliveries */}
         <Tabs value={tab} onValueChange={(v) => setTab(v as 'active' | 'completed')}>
           <TabsList>
             <TabsTrigger value="active" className="flex items-center gap-2">
@@ -135,6 +147,7 @@ const PartnerOrders = () => {
             </TabsTrigger>
           </TabsList>
 
+          {/* Active deliveries table */}
           <TabsContent value="active" className="space-y-4">
             <Card>
               <CardHeader>
@@ -144,10 +157,13 @@ const PartnerOrders = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      {/* Basic order metadata */}
                       <TableHead>Order</TableHead>
                       <TableHead>Patient</TableHead>
+                      {/* Pickup and drop-off locations */}
                       <TableHead>Pickup</TableHead>
                       <TableHead>Drop-off</TableHead>
+                      {/* Quick logistics summary */}
                       <TableHead>Items</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>Status</TableHead>
@@ -180,6 +196,7 @@ const PartnerOrders = () => {
                         <TableCell>₦{o.amount.toLocaleString()}</TableCell>
                         <TableCell>{statusBadge(o.status)}</TableCell>
                         <TableCell className="text-right space-x-2">
+                          {/* Example quick actions a rider might take */}
                           <Button variant="secondary" size="sm" className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> Contact</Button>
                           <Button size="sm" className="inline-flex items-center gap-1 bg-cyan-600 hover:bg-cyan-700"><Navigation className="h-3 w-3" /> Navigate</Button>
                         </TableCell>
@@ -191,6 +208,7 @@ const PartnerOrders = () => {
             </Card>
           </TabsContent>
 
+          {/* Completed deliveries table */}
           <TabsContent value="completed" className="space-y-4">
             <Card>
               <CardHeader>

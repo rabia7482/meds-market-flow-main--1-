@@ -12,11 +12,16 @@ import { Separator } from '@/components/ui/separator';
 import { Bike, Store, User, Mail, Phone, MapPin, IdCard, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+// Page for partners to submit applications as either dispatch riders or vendor partners.
+// Two-tab form UI with local state, validation, and success toasts.
+
 const PartnerSignup = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  // Controls which application form is visible
   const [tab, setTab] = useState<'rider' | 'vendor'>('rider');
 
+  // Rider application form state
   const [rider, setRider] = useState({
     fullName: '',
     email: '',
@@ -29,6 +34,7 @@ const PartnerSignup = () => {
     agree: false,
   });
 
+  // Vendor application form state
   const [vendor, setVendor] = useState({
     businessName: '',
     contactName: '',
@@ -41,6 +47,8 @@ const PartnerSignup = () => {
     agree: false,
   });
 
+  // Minimal client-side validation; shows a toast if required fields are missing.
+  // this is where you would submit to an API.
   const handleRiderSubmit = () => {
     if (!rider.fullName || !rider.email || !rider.phone || !rider.agree) {
       toast({ title: 'Missing information', description: 'Please fill all required fields and agree to the terms.', variant: 'destructive' });
@@ -50,6 +58,7 @@ const PartnerSignup = () => {
     setTimeout(() => navigate('/partner/orders'), 600);
   };
 
+  // Same validation pattern for vendor applications
   const handleVendorSubmit = () => {
     if (!vendor.businessName || !vendor.contactName || !vendor.email || !vendor.phone || !vendor.agree) {
       toast({ title: 'Missing information', description: 'Please fill all required fields and agree to the terms.', variant: 'destructive' });
@@ -62,11 +71,13 @@ const PartnerSignup = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
+        {/* Header copy that explains the partner program */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Partner with MedsMarket</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">Sign up as a dispatch rider or vendor partner and help deliver medications quickly and safely to patients.</p>
         </div>
 
+        {/* Tabs toggle between Rider and Vendor application forms */}
         <Tabs value={tab} onValueChange={(v) => setTab(v as 'rider' | 'vendor')} className="max-w-5xl mx-auto w-full">
           <TabsList className="mx-auto">
             <TabsTrigger value="rider" className="flex items-center gap-2"><Bike className="h-4 w-4" /> Rider</TabsTrigger>
@@ -80,6 +91,7 @@ const PartnerSignup = () => {
                 <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-cyan-600" /> Dispatch Rider Application</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Rider details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="riderName">Full Name *</Label>
@@ -150,6 +162,7 @@ const PartnerSignup = () => {
 
                 <Separator />
 
+                {/* Terms checkbox and submit */}
                 <div className="flex items-start gap-3">
                   <Checkbox id="riderAgree" checked={rider.agree} onCheckedChange={(c) => setRider({ ...rider, agree: Boolean(c) })} />
                   <Label htmlFor="riderAgree" className="text-sm">I agree to the terms and confirm my documents are valid.</Label>
@@ -167,6 +180,7 @@ const PartnerSignup = () => {
                 <CardTitle className="flex items-center gap-2"><Store className="h-5 w-5 text-cyan-600" /> Vendor Application</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Vendor details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="businessName">Business Name *</Label>
@@ -223,6 +237,7 @@ const PartnerSignup = () => {
 
                 <Separator />
 
+                {/* Terms checkbox and submit */}
                 <div className="flex items-start gap-3">
                   <Checkbox id="vendorAgree" checked={vendor.agree} onCheckedChange={(c) => setVendor({ ...vendor, agree: Boolean(c) })} />
                   <Label htmlFor="vendorAgree" className="text-sm">I agree to the partnership terms and confirm provided information is accurate.</Label>

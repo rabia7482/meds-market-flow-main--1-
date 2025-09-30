@@ -26,6 +26,9 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+// Subscription page that lets a user pick a plan, fill details, and subscribe.
+// Persists subscription via Supabase and triggers an email edge function.
+
 interface SubscriptionPlan {
   id: string;
   name: string;
@@ -38,9 +41,11 @@ interface SubscriptionPlan {
 }
 
 const Subscription = () => {
+  // UI state: selected plan and billing cycle toggles
   const [selectedPlan, setSelectedPlan] = useState<string>('premium');
   const [isYearly, setIsYearly] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // Form data for checkout/subscription
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -55,6 +60,7 @@ const Subscription = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Available subscription plans shown as selectable cards
   const plans: SubscriptionPlan[] = [
     {
       id: 'basic',
@@ -119,6 +125,7 @@ const Subscription = () => {
     }));
   };
 
+  // Main subscribe action: validate inputs, persist to DB, and send confirmation email.
   const handleSubscribe = async () => {
     if (!formData.agreeToTerms) {
       toast({
@@ -150,6 +157,7 @@ const Subscription = () => {
     setIsLoading(true);
 
     try {
+      // Get selected plan configuration
       const selectedPlanData = plans.find(plan => plan.id === selectedPlan);
       if (!selectedPlanData) {
         throw new Error('Selected plan not found');
@@ -159,7 +167,7 @@ const Subscription = () => {
       const billingPeriod = isYearly ? 'yearly' : 'monthly';
       const period = isYearly ? 'year' : 'month';
 
-      // Prepare subscription data
+      // Prepare subscription data for persistence
       const subscriptionData = {
         user_id: user.id,
         plan_name: selectedPlanData.name,
@@ -175,7 +183,7 @@ const Subscription = () => {
         payment_method: formData.paymentMethod,
       };
 
-      // Insert subscription into database
+      // Insert subscription into database (Supabase)
       const { error: insertError } = await supabase
         .from('subscriptions')
         .insert(subscriptionData);
@@ -184,7 +192,7 @@ const Subscription = () => {
         throw new Error(`Failed to save subscription: ${insertError.message}`);
       }
 
-      // Send confirmation email via Edge Function
+      // Send confirmation email via Edge Function (non-blocking if it fails)
       const { error: emailError } = await supabase.functions.invoke(
         'send-subscription-email',
         {
@@ -204,7 +212,7 @@ const Subscription = () => {
         // Don't fail the subscription if email fails, just log it
       }
 
-      // Success toast
+      // Success feedback and form reset
       toast({
         title: "Subscription Successful!",
         description: `Welcome to ${selectedPlanData.name} plan! You'll receive a confirmation email shortly.`,
@@ -234,6 +242,7 @@ const Subscription = () => {
     }
   };
 
+  // Convenience: current plan object for summary rendering
   const selectedPlanData = plans.find(plan => plan.id === selectedPlan);
 
   return (
