@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
 import {
   Check,
   Star,
@@ -20,7 +23,7 @@ import {
   User,
   Mail,
   MapPin,
-  Calendar
+  Calendar as CalendarIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,8 +57,12 @@ const Subscription = () => {
     address: '',
     city: '',
     state: '',
+    condition: '',
+    frequency: '',
+    deliveryDate: undefined as Date | undefined,
     paymentMethod: '',
-    agreeToTerms: false
+    agreeToTerms: false,
+    agreeToDataProcessing: false
   });
   const { toast } = useToast();
   const { user } = useAuth();
@@ -118,7 +125,7 @@ const Subscription = () => {
     }
   ];
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string | boolean | Date | undefined) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -131,6 +138,15 @@ const Subscription = () => {
       toast({
         title: "Terms Required",
         description: "Please agree to the terms and conditions to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.agreeToDataProcessing) {
+      toast({
+        title: "Data Processing Consent Required",
+        description: "Please consent to secure processing of your medical and personal information.",
         variant: "destructive",
       });
       return;
@@ -177,6 +193,9 @@ const Subscription = () => {
         last_name: formData.lastName,
         email: formData.email,
         phone: formData.phone,
+        condition: formData.condition,
+        frequency: formData.frequency,
+        delivery_date: formData.deliveryDate,
         address: formData.address,
         city: formData.city,
         state: formData.state,
@@ -227,8 +246,12 @@ const Subscription = () => {
         address: '',
         city: '',
         state: '',
+        condition: '',
+        frequency: '',
+        deliveryDate: undefined,
         paymentMethod: '',
-        agreeToTerms: false
+        agreeToTerms: false,
+        agreeToDataProcessing: false
       });
 
     } catch (error) {
@@ -464,7 +487,63 @@ const Subscription = () => {
                     </Select>
                   </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="condition">Chronic Medical Condition</Label>
+                    <Select value={formData.condition} onValueChange={(value) => handleInputChange('condition', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your condition" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="asthma">Asthma</SelectItem>
+                        <SelectItem value="diabetes">Diabetes</SelectItem>
+                        <SelectItem value="hypertension">Hypertension</SelectItem>
+                        <SelectItem value="hiv/aids">HIV/AIDS</SelectItem>
+                        <SelectItem value="others(specify)">OTHERS(SPECIFY)</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
+                      </SelectContent>
+
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="frequency">Delivery Frequency</Label>
+                    <Select value={formData.frequency} onValueChange={(value) => handleInputChange('frequency', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="deliveryDate">Preferred Delivery Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={`w-full justify-start text-left font-normal ${!formData.deliveryDate && "text-muted-foreground"}`}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.deliveryDate ? format(formData.deliveryDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={formData.deliveryDate}
+                        onSelect={(date) => handleInputChange('deliveryDate', date)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
+
+              
 
               <Separator />
 
@@ -506,6 +585,21 @@ const Subscription = () => {
                     </p>
                   </div>
                 </div>
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="dataProcessing"
+                    checked={formData.agreeToDataProcessing}
+                    onCheckedChange={(checked) => handleInputChange('agreeToDataProcessing', checked as boolean)}
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="dataProcessing" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      I consent to secure processing of my medical and personal information in compliance with the Nigeria Data Protection Act (2023) and Pharmacist Council of Nigeria regulations
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Your data will be processed securely and used only for providing healthcare services and medication delivery.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Subscription Summary */}
@@ -544,7 +638,7 @@ const Subscription = () => {
               <Button
                 className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold py-3 text-lg"
                 onClick={handleSubscribe}
-                disabled={!formData.agreeToTerms || isLoading}
+                disabled={!formData.agreeToTerms || !formData.agreeToDataProcessing || isLoading}
               >
                 {isLoading ? (
                   <>
